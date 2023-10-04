@@ -4,13 +4,30 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Post
 
 
 def index(request):
+
+    if request.method == "POST":
+        # create a user's post
+        current_user = request.user
+        content = request.POST["textarea"]
+        p = Post(
+            author = current_user,
+            content = content
+            )
+
+    else:
+        pass
+
+
     return render(request, "network/index.html")
 
 
+
+
+''' The start of the distribution code '''
 def login_view(request):
     if request.method == "POST":
 
@@ -61,3 +78,5 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+''' End of the distribution code '''
