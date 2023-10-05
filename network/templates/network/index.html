@@ -1,12 +1,35 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <!-- Add post -->
-    <h2>Add post</h2>
-    <textarea placeholder="What is in your mind?" rows="4" cols="100"></textarea>
+<div class="home_page">
 
+    <div class="new_post">
+        <!-- Add post -->
+        <h2>New post</h2>
+        <form action="/" method="post">
+            {% csrf_token %}
+            {{ post_form }}
+            <br>
+            <input class="btn btn-primary" type="submit" value="Post">
+        </form>
+    </div>
 
 
     <!-- Display all posts -->
-    <h2>All posts</h2>
+    <div class="all_posts">
+        <h2>All posts</h2>
+
+        <!-- Displays all the posts -->
+        {% for post in posts %}
+        <div class="each_post">
+            <h4>{{ post.author }}</h4>
+            {{ post.content }}
+            <h6>{{ post.date }}</h6>
+            <h6>Diplay the likes TODO {{ post.like_count }}</h6>
+
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
 {% endblock %}
