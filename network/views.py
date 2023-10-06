@@ -7,26 +7,35 @@ from django.core.paginator import Paginator
 # Test
 from django.db import models 
 # Test
-from .models import User, Post, Like
+from .models import User, Post, Like, Following
 from .forms import PostForm
 
 
 def user_profile(request, user_id):
-
+    # user that is loged in
     current_user = request.user
 
+    # info of the user that profile we want
     profile_user = User.objects.get(pk=user_id)
     users_posts = Post.objects.filter(author=profile_user)
 
+    # display only 10 post per page
     paginator = Paginator(users_posts, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    
+    # get the users followers and following
+    followers = Following.objects.filter(followed_user=profile_user)
+    print(f'{followers} This is followers')
+    following = Following.objects.filter(user=profile_user)
+    print(f'{following} This is FOLLOWING')
+
 
     return render(request, "network/user_profile.html", {
         "profile_user": profile_user,
-        "page_obj": page_obj
+        "page_obj": page_obj,
+        "followers":followers.count(),
+        "following":following.count(),
     })
 
 

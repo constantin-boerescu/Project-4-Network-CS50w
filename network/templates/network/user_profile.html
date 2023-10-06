@@ -7,10 +7,17 @@
     <div class="user_profile">
         <h1>{{profile_user.username}}</h1>
         <div class="user_info">
-            <h5>Followes: TODO</h5>
-            <h5>Following: TODO</h5>
+            <h5>Followes: {{followers}}</h5>
+            <h5>Following: {{following}}</h5>
         </div>
     </div>
+
+    <!-- Follow/Unfollow section -->
+
+    {% if user.is_authenticated %}
+
+    {% endif %}
+
 
 
     <!-- Displays all the posts -->
