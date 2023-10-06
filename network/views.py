@@ -11,7 +11,29 @@ from .models import User, Post, Like, Following
 from .forms import PostForm
 
 
+def togglefollow(request, user_id, action):
+    '''Follow or unfollow a user'''
+
+    current_user = request.user
+    action_user = User.objects.get(pk=user_id)
+
+    # Follow the user 
+    if action == 'follow':
+        f = Following(user = current_user, followed_user=action_user)
+        f.save()
+        print('follow')
+
+    # Unfollow the user 
+    else:
+        f = Following.objects.filter(user = current_user, followed_user=action_user)
+        f.delete()
+        print('unfollow')
+
+    return HttpResponseRedirect(reverse('user_profile', args=[user_id]))
+
 def user_profile(request, user_id):
+    ''' Displays a user profile'''
+
     # user that is loged in
     current_user = request.user
 
@@ -26,9 +48,14 @@ def user_profile(request, user_id):
 
     # get the users followers and following
     followers = Following.objects.filter(followed_user=profile_user)
-    print(f'{followers} This is followers')
     following = Following.objects.filter(user=profile_user)
-    print(f'{following} This is FOLLOWING')
+
+    # check if the current user follows the profile user
+    for follower in followers:
+        if current_user == follower.user:
+            is_following = True
+        else:
+            is_following = False
 
 
     return render(request, "network/user_profile.html", {
@@ -36,11 +63,13 @@ def user_profile(request, user_id):
         "page_obj": page_obj,
         "followers":followers.count(),
         "following":following.count(),
+        "is_following":is_following,
     })
 
 
 
 def index(request):
+    '''Diplays all post and let the user createa anoter post'''
 
     if request.method == "POST":
         # create a user's post
@@ -72,11 +101,6 @@ def index(request):
         paginator = Paginator(all_posts, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-
-
-        for post in all_posts:
-            print(f"Post: {post.content}, Like Count: {post.like_count}")
-
 
     return render(request, "network/index.html", {
         "post_form": post_form,

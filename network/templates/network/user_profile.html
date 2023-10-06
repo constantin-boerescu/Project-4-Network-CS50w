@@ -13,9 +13,21 @@
     </div>
 
     <!-- Follow/Unfollow section -->
-
     {% if user.is_authenticated %}
+        {% if user != profile_user %}
+            {% if is_following %}
+            <form action="{% url 'togglefollow' profile_user.id 'unfollow' %}">
+                <input type="submit" class="btn btn-secondary" value="Unfollow">
+            </form>
 
+            {% else %}
+
+            <form action="{% url 'togglefollow' profile_user.id 'follow' %}">
+                <input type="submit" class="btn btn-primary" value="Follow">
+            </form>
+
+            {% endif %}
+        {% endif %}
     {% endif %}
 
 
