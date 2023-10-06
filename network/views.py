@@ -3,11 +3,32 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.core.paginator import Paginator
 # Test
 from django.db import models 
 # Test
 from .models import User, Post, Like
 from .forms import PostForm
+
+
+def user_profile(request, user_id):
+
+    current_user = request.user
+
+    profile_user = User.objects.get(pk=user_id)
+    users_posts = Post.objects.filter(author=profile_user)
+
+    paginator = Paginator(users_posts, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    
+
+    return render(request, "network/user_profile.html", {
+        "profile_user": profile_user,
+        "page_obj": page_obj
+    })
+
 
 
 def index(request):
@@ -39,15 +60,24 @@ def index(request):
 
         # get all the posts
         all_posts = Post.objects.annotate(like_count=models.Count('likes')).order_by('-pk')
-        print(all_posts[0])
+        paginator = Paginator(all_posts, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+
         for post in all_posts:
             print(f"Post: {post.content}, Like Count: {post.like_count}")
 
 
     return render(request, "network/index.html", {
         "post_form": post_form,
-        "posts": all_posts
+        "page_obj": page_obj
+        
         })
+
+
+
+
 
 
 
