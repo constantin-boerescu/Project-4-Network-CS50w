@@ -11,6 +11,29 @@ from .models import User, Post, Like, Following
 from .forms import PostForm
 
 
+
+def following_page(request):
+    '''Display a page of all the post made by users that the current user follows'''
+    
+    current_user = request.user
+
+    # get the followed users and all their posts
+    followed_users = Following.objects.filter(user=current_user).values_list('followed_user', flat=True)
+    post_of_followed_users = Post.objects.filter(author__in=followed_users)
+
+    # display 10 post per page
+
+    paginator = Paginator(post_of_followed_users, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+
+
+
+    return render(request, 'network/following_page.html',{
+        "page_obj": page_obj
+    })
+
 def togglefollow(request, user_id, action):
     '''Follow or unfollow a user'''
 
@@ -36,7 +59,7 @@ def user_profile(request, user_id):
 
     # user that is loged in
     current_user = request.user
-
+ 
     # info of the user that profile we want
     profile_user = User.objects.get(pk=user_id)
     users_posts = Post.objects.filter(author=profile_user)
@@ -51,11 +74,10 @@ def user_profile(request, user_id):
     following = Following.objects.filter(user=profile_user)
 
     # check if the current user follows the profile user
+    is_following = False
     for follower in followers:
         if current_user == follower.user:
             is_following = True
-        else:
-            is_following = False
 
 
     return render(request, "network/user_profile.html", {
@@ -121,7 +143,7 @@ def index(request):
 
 
 
-''' The start of the distribution code '''
+''' The beggining of the distribution code '''
 def login_view(request):
     if request.method == "POST":
 
