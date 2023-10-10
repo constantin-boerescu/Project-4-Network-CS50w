@@ -6,10 +6,24 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 # Test
 from django.db import models 
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 # Test
 from .models import User, Post, Like, Following
 from .forms import PostForm
 
+@login_required
+def like_post(request, post_id):
+    post=Post.objects.get(pk=post_id)
+    current_user = request.user
+
+    if current_user in post.likes.all():
+        post.likes.remove(current_user)
+        liked = False
+    else:
+        post.likes.add(current_user)
+        liked = True
+    return JsonResponse({'liked': liked, 'like_count':post.likes.count()})
 
 
 def following_page(request):
@@ -22,13 +36,9 @@ def following_page(request):
     post_of_followed_users = Post.objects.filter(author__in=followed_users)
 
     # display 10 post per page
-
     paginator = Paginator(post_of_followed_users, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
-
-
 
     return render(request, 'network/following_page.html',{
         "page_obj": page_obj
@@ -88,8 +98,6 @@ def user_profile(request, user_id):
         "is_following":is_following,
     })
 
-
-
 def index(request):
     '''Diplays all post and let the user createa anoter post'''
 
@@ -117,6 +125,15 @@ def index(request):
     else:
         # displays the form
         post_form = PostForm()
+
+        '''TEST LIKE SECTION TODO'''
+
+        
+
+
+        ''' END OF THE TEST'''
+
+
 
         # get all the posts
         all_posts = Post.objects.annotate(like_count=models.Count('likes')).order_by('-pk')
