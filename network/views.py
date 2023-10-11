@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 import json
 # Test
-from .models import User, Post, Like, Following
+from .models import User, Post, Following
 from .forms import PostForm
 
 
@@ -89,7 +89,7 @@ def user_profile(request, user_id):
  
     # info of the user that profile we want
     profile_user = User.objects.get(pk=user_id)
-    users_posts = Post.objects.filter(author=profile_user)
+    users_posts = Post.objects.filter(author=profile_user).order_by('-pk')
 
     # display only 10 post per page
     paginator = Paginator(users_posts, 10)

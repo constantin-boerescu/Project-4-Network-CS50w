@@ -15,15 +15,6 @@ class Post(models.Model):
     def __str__(self):
         return f"Post {self.id} was made by {self.author} at {self.date.strftime('%d %b %Y %H:%M:%S')}"
     
-class Like(models.Model):
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Like {self.id}. {self.user} liked {self.post}"
-    
 class Following(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_that_follows")
