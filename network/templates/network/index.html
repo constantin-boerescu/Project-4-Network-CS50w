@@ -30,8 +30,7 @@
                 const likeCount = document.getElementById(`like-count-${post_id}`)
                 likeCount.innerText = `${data.like_count} Likes`;
                 const likeBtn = document.getElementById(`like-btn-${post_id}`)
-                
-                // TODO FIX THE UNLIKE AT REFRESH
+
                 if(data.liked){
                     likeBtn.textContent = 'Unlike'
                 } else {
@@ -76,15 +75,18 @@
             <h4><a href = "{% url 'user_profile' post.author.id %}">{{ post.author }}</a></h4>
             {{ post.content }}
             <h6>{{ post.date }}</h6>
-
             <h6 id="like-count-{{ post.id }}">{{ post.likes.count }} Likes</h6>
 
             <!-- Like/Unlike section -->
 
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and post.author != user%}
 
-            <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="likePost({{ post.id }})">Like</button>
-
+                {% if user in post.likes.all %}
+                    <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="likePost({{ post.id }})">Unlike</button>
+                
+                {% else %}
+                    <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="likePost({{ post.id }})">Like</button>
+                {% endif %}
             {% endif %}
 
             <!-- Edit post section -->

@@ -100,10 +100,10 @@ def user_profile(request, user_id):
 
 def index(request):
     '''Diplays all post and let the user createa anoter post'''
+    # create a user's post
+    current_user = request.user
 
     if request.method == "POST":
-        # create a user's post
-        current_user = request.user
 
         # create a form instance and populate with data 
         post_form = PostForm(request.POST)
@@ -136,11 +136,12 @@ def index(request):
 
 
         # get all the posts
-        all_posts = Post.objects.annotate(like_count=models.Count('likes')).order_by('-pk')
+        all_posts = Post.objects.all().order_by('-pk')
         paginator = Paginator(all_posts, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-
+        for each_post in all_posts:
+            print(each_post.likes.all())
     return render(request, "network/index.html", {
         "post_form": post_form,
         "page_obj": page_obj
