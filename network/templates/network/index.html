@@ -54,7 +54,7 @@
             const postContent = document.getElementById(`post-content-${post_id}`)
             const content = postContent.innerText
             // change into a text area autocompleted with the text
-            postContent.innerHTML = `<textarea id='text-area-content-${post_id}'>${content}</textarea>`
+            postContent.innerHTML = `<textarea rows=3 cols=50 id='text-area-content-${post_id}'>${content}</textarea>`
             // hide the edit button show save button
             document.getElementById(`save-btn-${post_id}`).hidden = false;
             document.getElementById(`edit-btn-${post_id}`).hidden = true;
