@@ -1,6 +1,54 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+<script>
+    function getCSRFToken() {
+        const csrfCookieName = 'csrftoken';
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(csrfCookieName + '=')) {
+                return cookie.substring(csrfCookieName.length + 1);
+            }
+        }
+        return null;
+}
+
+        // Like/Umlike a post
+        function likePost(post_id){
+            console.log(post_id)
+            fetch(`/like_post/${post_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                credentials: 'same-origin',
+            })
+            .then(response => response.json())
+            .then(data => {
+                const likeCount = document.getElementById(`like-count-${post_id}`)
+                likeCount.innerText = `${data.like_count} Likes`;
+                const likeBtn = document.getElementById(`like-btn-${post_id}`)
+
+                if(data.liked){
+                    likeBtn.textContent = 'Unlike'
+                } else {
+                    likeBtn.textContent = "Like"
+                }
+
+            })
+            .catch(error => {
+                console.error("Error", error);
+            });
+        }
+
+        // Edit a post
+        function editPost(post_id){
+            console.log(`edit ${post_id}`)
+        }
+
+    </script>
 <div class="home_page">
 
     <h2>Following posts</h2>
@@ -10,7 +58,18 @@
             <h4><a href = "{% url 'user_profile' post.author.id %}">{{ post.author }}</a></h4>
             {{ post.content }}
             <h6>{{ post.date }}</h6>
-            <h6>Diplay the likes STILL TODO {{ post.likes.count }}</h6>
+            <h6 id="like-count-{{ post.id }}">{{ post.likes.count }} Likes</h6>
+            <!-- Like/Unlike section -->
+
+            {% if user.is_authenticated and post.author != user%}
+
+                {% if user in post.likes.all %}
+                    <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="likePost({{ post.id }})">Unlike</button>
+                
+                {% else %}
+                    <button class="btn btn-primary" id="like-btn-{{ post.id }}" onclick="likePost({{ post.id }})">Like</button>
+                {% endif %}
+            {% endif %}
         </div>
         {% endfor %}
 

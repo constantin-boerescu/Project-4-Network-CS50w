@@ -12,6 +12,7 @@ urlpatterns = [
     path("togglefollow/<int:user_id>/<str:action>", views.togglefollow, name="togglefollow"),
     path("following_page", views.following_page, name="following_page"),
     path('like_post/<int:post_id>', views.like_post, name='like_post'),
+    path('edit_post/<int:post_id>', views.edit_post, name='edit_post'),
 
     
 ]

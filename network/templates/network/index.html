@@ -2,6 +2,7 @@
 
 {% block body %}
     <script>
+        // Get the CSRF TOKEN
     function getCSRFToken() {
         const csrfCookieName = 'csrftoken';
         const cookies = document.cookie.split(';');
@@ -14,9 +15,9 @@
         return null;
 }
 
-        // Like/Umlike a post
+        // Like/Unlike a post
         function likePost(post_id){
-            console.log(post_id)
+
             fetch(`/like_post/${post_id}`, {
                 method: 'POST',
                 headers: {
@@ -27,10 +28,12 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Add the like and change the likes number 
                 const likeCount = document.getElementById(`like-count-${post_id}`)
                 likeCount.innerText = `${data.like_count} Likes`;
                 const likeBtn = document.getElementById(`like-btn-${post_id}`)
 
+                // Change the button
                 if(data.liked){
                     likeBtn.textContent = 'Unlike'
                 } else {
@@ -43,16 +46,51 @@
             });
         }
 
-        // Edit a post
-        function editPost(post_id){
-            console.log(`edit ${post_id}`)
+
+        // edit the post text
+        function changeText(post_id){
+
+            // get the text content
+            const postContent = document.getElementById(`post-content-${post_id}`)
+            const content = postContent.innerText
+            // change into a text area autocompleted with the text
+            postContent.innerHTML = `<textarea id='text-area-content-${post_id}'>${content}</textarea>`
+            // hide the edit button show save button
+            document.getElementById(`save-btn-${post_id}`).hidden = false;
+            document.getElementById(`edit-btn-${post_id}`).hidden = true;
         }
 
+
+        // Save the post
+        function editPost(post_id){
+            // get the text content and pass it to back-end
+            const postContent = document.getElementById(`text-area-content-${post_id}`)
+            const postFormat = document.getElementById(`post-content-${post_id}`)
+            const content = postContent.value
+
+            fetch(`/edit_post/${post_id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                credentials: 'same-origin',
+
+                body: JSON.stringify({'post_data':content})
+            })
+
+            .then(response => response.json())
+            .then(data => {
+                // change the post content in the front-end and hide save show edit button 
+                postFormat.innerHTML = data.new_content
+                document.getElementById(`save-btn-${post_id}`).hidden = true;
+                document.getElementById(`edit-btn-${post_id}`).hidden = false;
+            })
+            .catch(error => {
+                console.error("Error", error);
+            });
+        }
     </script>
-
-
-
-
 
 
 <div class="home_page">
@@ -73,7 +111,8 @@
         {% for post in page_obj %}
         <div class="each_post">
             <h4><a href = "{% url 'user_profile' post.author.id %}">{{ post.author }}</a></h4>
-            {{ post.content }}
+            <span id="post-content-{{ post.id }}">{{ post.content }}</span>
+
             <h6>{{ post.date }}</h6>
             <h6 id="like-count-{{ post.id }}">{{ post.likes.count }} Likes</h6>
 
@@ -94,14 +133,12 @@
             {% if user.is_authenticated %}
                 
                 {% if post.author == user %}
-                <button class="btn btn-primary" onclick="editPost({{ post.id }})">Edit</button>
+                <button class="btn btn-primary" id="save-btn-{{ post.id }}" onclick="editPost({{ post.id }})" hidden="hidden" >Save</button>
+                <button class="btn btn-primary" id="edit-btn-{{ post.id }}" onclick="changeText({{ post.id }})">Edit</button>
                 {% endif %}
             {% endif %}
-
-
         </div>
         {% endfor %}
-
 
 
     <!-- The pagination part -->

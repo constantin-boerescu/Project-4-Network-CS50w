@@ -8,12 +8,29 @@ from django.core.paginator import Paginator
 from django.db import models 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+import json
 # Test
 from .models import User, Post, Like, Following
 from .forms import PostForm
 
+
+@login_required
+def edit_post(request, post_id):
+    '''Edit a post content into database'''
+
+    post=Post.objects.get(pk=post_id)
+
+    new_content = json.load(request)['post_data']
+
+    post.content = new_content
+    post.save()
+    
+    return JsonResponse({'new_content': post.content})
+
 @login_required
 def like_post(request, post_id):
+    '''Get the post add or remove or like'''
+    
     post=Post.objects.get(pk=post_id)
     current_user = request.user
 
@@ -126,22 +143,12 @@ def index(request):
         # displays the form
         post_form = PostForm()
 
-        '''TEST LIKE SECTION TODO'''
-
-        
-
-
-        ''' END OF THE TEST'''
-
-
-
         # get all the posts
         all_posts = Post.objects.all().order_by('-pk')
         paginator = Paginator(all_posts, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        for each_post in all_posts:
-            print(each_post.likes.all())
+
     return render(request, "network/index.html", {
         "post_form": post_form,
         "page_obj": page_obj
